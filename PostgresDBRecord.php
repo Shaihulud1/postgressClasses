@@ -29,7 +29,7 @@ class PostgresDBRecord
         }
     }
 
-    protected function doQuery($tableName, $arSelectOptions = false, $arInsertOptions = false, $arUpdateCounter = false)
+    protected function doQuery($tableName, $arSelectOptions = false, $arInsertOptions = false, $arUpdateOptions = false)
     {
         try {
             if(is_array($arSelectOptions))
@@ -50,15 +50,25 @@ class PostgresDBRecord
             }
             elseif(is_array($arInsertOptions))
             {
-                $sqlQuery = "INSERT INTO ".$tableName." (".implode(", ", array_keys($arInsertOptions)).")
-                                    VALUES (".implode(", ", array_keys($arInsertOptions)).")";
-
-                print_r($sqlQuery);
-                die();
+                $sqlQuery = "INSERT INTO ".$tableName." (".implode(", ", array_keys($arInsertOptions['INSERT_VALUE'])).")
+                                    VALUES (".implode(", ", $arInsertOptions['INSERT_VALUE']).")";
             }
-            elseif(is_array($arUpdateCounter))
+            elseif(is_array($arUpdateOptions))
             {
-
+                print_r($arUpdateOptions);
+                $sqlQuery = "UPDATE ".$tableName." SET";
+                foreach($arUpdateOptions['SET_VALUE'] as $var => $value)
+                {
+                    $sqlQuery.= " ".$var." = ".$value;
+                }
+                if(!empty($arUpdateOptions['WHERE_VALUE']))
+                {
+                    $sqlQuery .= " WHERE";
+                    foreach($arUpdateOptions['WHERE_VALUE'] as $var => $value)
+                    {
+                        $sqlQuery.= " ".$var." = ".$value;
+                    }
+                }
             }
 
             $result = @pg_query($this->pstDB, $sqlQuery);
